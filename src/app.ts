@@ -1,10 +1,15 @@
 import express, { Request, Response, NextFunction } from 'express'; // Importing the express module to create a web server
 import noteRoutes from './routes/noteRoute';
 import { errorHandler } from './middlewares/errorHandler';
+import { connectToDatabase } from './database/init';
 
 const app = express(); // Creating an instance of an Express application
 
 app.use(express.json()); // Middleware to parse JSON request bodies, then we can use req.body to access the parsed data
+
+(async () => {
+	await connectToDatabase(); // Connecting to the database before starting the server
+})();
 
 app.use('/notes', noteRoutes); // Mounting the noteRoutes on the '/notes' path
 
