@@ -6,12 +6,14 @@ interface Config {
     port: number; // Port number for the server
     nodeEnv: string; // Node environment (development, production, etc.)
     dbUri: string; // MongoDB URI for database connection
+    jwtSecret: string; // Optional token secret for authentication, can be used for JWT or other purposes
 }
 
 const config: Config = {
     port: Number(process.env.PORT) || 3000, // Default to 3000 if PORT is not set
     nodeEnv: process.env.NODE_ENV || 'development', // Default to 'development' if NODE_ENV is not set
     dbUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/diary', // Default MongoDB URI
+    jwtSecret: process.env.TOKEN_SECRET || 'secret', // Default token secret, can be used for JWT or other purposes
 };
 
 export default config; // Exporting the config object to be used in other parts of the application
