@@ -9,7 +9,6 @@ app.listen(config.port, () => {
 
 function appExitHandler(code: number) {
   logger.info(`Server process has been exited with code ${code}`);
-  process.exit(code);
 }
 
 function appUncaughtExceptionHandler(err: Error, origin: string) {

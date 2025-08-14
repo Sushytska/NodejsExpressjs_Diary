@@ -4,7 +4,7 @@ import { User } from '../models/userModel';
 import { HttpError } from '../utils/HttpError'; // Importing a custom error handler
 import { RequestHandler } from 'express'; // Importing RequestHandler type from express for type safety
 import config from '../config/config'; // Importing the configuration
-import { generateAccessToken, generateRefreshToken } from '../utils/token'; // Importing token generation functions
+import { generateTokens } from '../utils/generateTokens'; // Importing token generation functions
 
 export const registerUser: RequestHandler = async (req, res, next) => { // Middleware to handle user registration
     try {   
@@ -51,8 +51,7 @@ export const loginUser: RequestHandler = async (req, res, next) => { // Middlewa
             return next(new HttpError('Invalid username or password', 401)); // Using the errorHandler middleware to handle the error
         }
 
-        const accessToken = generateAccessToken(user._id?.toString()); // Generating an access token
-        const refreshToken = generateRefreshToken(user._id?.toString()); // Generating a refresh token
+        const { accessToken, refreshToken } = generateTokens({ userId: user._id.toString(), role: 'user' }); // Generating access and refresh tokens
 
         res.cookie("accessToken", accessToken, { // Setting the access token as a cookie
             httpOnly: true, // Secure: true, // Ensuring the cookie is only sent over HTTPS

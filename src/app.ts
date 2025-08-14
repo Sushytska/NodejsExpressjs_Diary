@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express'; // Importing
 import noteRoutes from './routes/noteRoute';
 import { errorHandler } from './middlewares/errorHandler';
 import { connectToDatabase } from './database/init';
+import { cleanUpTokenDB } from './middlewares/cleanUpTokenDB';
 
 const app = express(); // Creating an instance of an Express application
 
@@ -10,6 +11,8 @@ app.use(express.json()); // Middleware to parse JSON request bodies, then we can
 (async () => {
 	await connectToDatabase(); // Connecting to the database before starting the server
 })();
+
+app.use(cleanUpTokenDB); // Middleware to clean up old tokens from the database
 
 app.use('/notes', noteRoutes); // Mounting the noteRoutes on the '/notes' path
 
