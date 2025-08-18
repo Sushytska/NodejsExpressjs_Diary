@@ -1,15 +1,15 @@
-import express, { Request, Response, NextFunction } from 'express'; // Importing the express module to create a web server
-import noteRoutes from './routes/noteRoute';
-import { errorHandler } from './middlewares/errorHandler';
-import { connectToDatabase } from './database/init';
-import { cleanUpTokenDB } from './middlewares/cleanUpTokenDB';
+import express from 'express'; // Importing the express module to create a web server
+import noteRoutes from './routes/noteRoute.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { connectToDatabase } from './database/init.js';
+import { cleanUpTokenDB } from './middlewares/cleanUpTokenDB.js';
 
 const app = express(); // Creating an instance of an Express application
 
 app.use(express.json()); // Middleware to parse JSON request bodies, then we can use req.body to access the parsed data
 
 (async () => {
-	await connectToDatabase(); // Connecting to the database before starting the server
+  await connectToDatabase(); // Connecting to the database before starting the server
 })();
 
 app.use(cleanUpTokenDB); // Middleware to clean up old tokens from the database
