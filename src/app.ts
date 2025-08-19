@@ -1,21 +1,29 @@
-import express from 'express'; // Importing the express module to create a web server
-import noteRoutes from './routes/noteRoute.js';
-import { errorHandler } from './middlewares/errorHandler.js';
-import { connectToDatabase } from './database/init.js';
-import { cleanUpTokenDB } from './middlewares/cleanUpTokenDB.js';
+import { startup } from './startup.js'; // Importing the Express application instance from app.ts
+import config from './config/config.js';
+import logger from './logger/logger.js'; // Importing the logger instance for logging
+import { gracefulShutdown } from './utils/gracefulShutdown.js';
 
-const app = express(); // Creating an instance of an Express application
+startup()
+  .then((app) => {
+    app.listen(config.port, () => {
+      logger.info(`Server is running on http://localhost:${config.port}`);
+    });
+  })
+  .catch((err) => {
+    logger.error('Failed to start the server:', err);
+  }); // Initializing the Express application
+// and starting the server on the specified port from the config
 
-app.use(express.json()); // Middleware to parse JSON request bodies, then we can use req.body to access the parsed data
-
-(async () => {
-  await connectToDatabase(); // Connecting to the database before starting the server
-})();
-
-app.use(cleanUpTokenDB); // Middleware to clean up old tokens from the database
-
-app.use('/notes', noteRoutes); // Mounting the noteRoutes on the '/notes' path
-
-app.use(errorHandler); // This middleware will catch all requests that do not match any defined routes and respond with a 404 status code
-
-export default app; // Exporting the Express application instance to be used in other files, such as the server file
+process.once('exit', (code) => gracefulShutdown(code));
+process.once('uncaughtException', (err) => {
+  logger.error('Uncaught Exception: ', err);
+  gracefulShutdown(1);
+}); // Handling uncaught exceptions to gracefully shut down the server
+process.once('SIGINT', () => gracefulShutdown(0)); // Handling SIGINT (Ctrl+C) to gracefully shut down the server
+process.once('SIGTERM', () => gracefulShutdown(0)); // kill command to gracefully shut down the server
+process.once('SIGUSR2', () => {
+  logger.info('SIGUSR2 received, restarting server...'); // nodemon started restarting the server on file changes
+  gracefulShutdown(0).then(() => {
+    process.kill(process.pid, 'SIGUSR2'); // passing the SIGUSR2 signal back to nodemon ((current process) process.pid) to finish restarting of server
+  });
+}); // Handling SIGUSR2 for nodemon restarts

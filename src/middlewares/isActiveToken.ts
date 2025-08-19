@@ -5,8 +5,8 @@ import config from '../config/config.js';
 import { RefreshToken } from '../models/refreshTokenModel.js';
 
 export const isActiveToken = async (req: Request, res: Response, next: NextFunction) => {
-  const accessToken = req.cookies.accessToken;
-  const refreshToken = req.cookies.refreshToken;
+  const accessToken = req.cookies?.accessToken;
+  const refreshToken = req.cookies?.refreshToken;
 
   if (!accessToken) {
     return next(new HttpError('Access token is required', 401)); // If no token is provided, return an error

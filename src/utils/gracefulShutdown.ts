@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'; // Importing mongoose for database connection management
-import logger from '../logger/index.js'; // Importing the logger instance for logging
+import logger from '../logger/logger.js'; // Importing the logger instance for logging
 
 // Closing the all database connection gracefully, clear the ceshe, and release resources
 // This is important to ensure that the application exits cleanly

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'; // Importing mongoose for MongoDB object modeling
 import config from '../config/config.js'; // Importing the configuration
-import logger from '../logger/index.js'; // Importing the logger instance for logging
+import logger from '../logger/logger.js'; // Importing the logger instance for logging
 
 const uri = config.dbUri; // Getting the MongoDB URI from the config
 

@@ -4,10 +4,14 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug TS Server",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["node --loader ts-node/esm", "src/server.ts"],
-      "skipFiles": ["<node_internals>/**", "node_modules/**"]
+      "name": "Debug app.ts Server",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--loader", "ts-node/esm"],
+      "program": "${workspaceFolder}/src/app.ts",
+      "cwd": "${workspaceFolder}",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
     }
   ]
 }

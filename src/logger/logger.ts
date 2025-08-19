@@ -9,7 +9,7 @@ const logger = createLogger({
   level: 'info', // Default log level
   format: combine(timestamp(), customFormat),
   transports: [
-    new transports.Console(), // Log to console
+    new transports.Console({ level: 'info' }), // Log to console
     new transports.File({ filename: 'error.log', level: 'error' }), // Log errors to a file
     new transports.File({ filename: 'combined.log' }), // Log all messages to a combined file
   ],
