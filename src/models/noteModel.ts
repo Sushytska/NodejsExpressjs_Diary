@@ -5,6 +5,7 @@ export interface INote extends Document {
   content: string;
   createdAt: Date;
   updatedAt: Date;
+  userId: mongoose.Types.ObjectId; // Adding userId to associate the note with a user
 }
 
 const noteSchema: Schema = new Schema({
@@ -25,6 +26,11 @@ const noteSchema: Schema = new Schema({
   updatedAt: {
     type: Date,
     default: Date.now,
+  },
+  userId: {
+    type: mongoose.Types.ObjectId,
+    required: [true, 'User ID is required'], // Ensuring that userId is provided
+    ref: 'User', // Reference to the User model
   },
 });
 

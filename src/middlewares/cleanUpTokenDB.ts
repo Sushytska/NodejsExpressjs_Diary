@@ -6,7 +6,7 @@ export const cleanUpTokenDB = (req: Request, res: Response, next: NextFunction) 
   // Delete revoked tokens older than 30 days
   RefreshToken.deleteMany({
     revoked: true,
-    revokedAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+    expiresAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
   })
     .then(() => {
       logger.info('Cleaned up old revoked tokens from the database');

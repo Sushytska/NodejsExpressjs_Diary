@@ -1,10 +1,16 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { HttpError } from '../utils/HttpError.js';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config/config.js';
 import { RefreshToken } from '../models/refreshTokenModel.js';
+import { AuthenticatedRequest } from '../models/authenticatedRequest.js';
+import { Types } from 'mongoose';
 
-export const isActiveToken = async (req: Request, res: Response, next: NextFunction) => {
+export const isActiveToken = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
   const accessToken = req.cookies?.accessToken;
   const refreshToken = req.cookies?.refreshToken;
 
@@ -17,7 +23,7 @@ export const isActiveToken = async (req: Request, res: Response, next: NextFunct
   }
 
   try {
-    jwt.verify(accessToken, config.jwtAccessSecret);
+    req.user = jwt.verify(accessToken, config.jwtAccessSecret) as JwtPayload; // Verify the access token and attach the user to the request object
     return next(); // If the access token is valid, proceed to the next middleware
   } catch (err: any) {
     if (err.name === 'TokenExpiredError') {

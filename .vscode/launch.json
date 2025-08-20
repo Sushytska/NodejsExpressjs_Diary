@@ -5,6 +5,7 @@
       "type": "node",
       "request": "launch",
       "name": "Debug app.ts Server",
+      "preLaunchTask": "tsc: build - tsconfig.json",
       "runtimeExecutable": "node",
       "runtimeArgs": ["--loader", "ts-node/esm"],
       "program": "${workspaceFolder}/src/app.ts",
