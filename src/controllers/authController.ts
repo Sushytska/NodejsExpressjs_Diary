@@ -5,6 +5,7 @@ import { RequestHandler } from 'express'; // Importing RequestHandler type from 
 import config from '../config/config.js'; // Importing the configuration
 import { generateTokens } from '../utils/generateTokens.js'; // Importing token generation functions
 import { RefreshToken } from '../models/refreshTokenModel.js';
+import logger from '../logger/logger.js';
 
 export const registerUser: RequestHandler = async (req, res, next) => {
   // Middleware to handle user registration
@@ -99,8 +100,52 @@ export const loginUser: RequestHandler = async (req, res, next) => {
         .map((err: any) => err.message)
         .join(', '); // Collecting validation error messages
 
+      logger.error(`Login failed: ${errorMessage}`); // Log the error if login fails
       return next(new HttpError(errorMessage, 400)); // Using the errorHandler middleware to handle validation errors
     }
+    next(error); // Passing the error to the errorHandler middleware
+  }
+};
+
+export const logoutUser: RequestHandler = async (req, res, next) => {
+  // Middleware to handle user logout
+  try {
+    const refreshToken = req.cookies.refreshToken; // Getting the refresh token from cookies
+
+    if (!refreshToken) {
+      logger.error('No refresh token provided'); // Log the error if no refresh token is provided
+      return next(new HttpError('No refresh token provided', 400)); // Using the errorHandler middleware to handle the error
+    }
+
+    const tokenExists = await RefreshToken.findOne({
+      token: refreshToken,
+    });
+
+    if (!tokenExists) {
+      logger.error('Refresh token not found'); // Log the error if the refresh token is not found
+      return next(new HttpError('Refresh token not found', 400)); // Using the errorHandler middleware to handle the error
+    } else if (tokenExists.revoked) {
+      res.clearCookie('accessToken'); // Clear cookies to log out the user
+      res.clearCookie('refreshToken');
+      logger.error(
+        `Refresh token already revoked: ${tokenExists._id}, ip address: ${req.ip?.toString()}`
+      ); // Log the revocation of the refresh token
+      return next(new HttpError('Invalid token', 400)); // Using the errorHandler middleware to handle the error
+    } else {
+      // Find and revoke the refresh token in the database
+      await RefreshToken.findOneAndUpdate(
+        { token: refreshToken, revoked: false },
+        { revoked: true, revokedAt: new Date(), revocationReason: 'Logout user' }, // Marking the token as revoked
+        { new: true } // Return the updated document
+      );
+    }
+
+    res.clearCookie('accessToken'); // Clear cookies to log out the user
+    res.clearCookie('refreshToken');
+
+    res.status(200).json({ message: 'Logout successful' }); // Responding with a success message
+  } catch (error: any) {
+    logger.error(`Logout failed: ${error.message}`); // Log the error if logout fails
     next(error); // Passing the error to the errorHandler middleware
   }
 };

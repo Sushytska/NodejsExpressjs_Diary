@@ -5,6 +5,7 @@ import config from '../config/config.js';
 import { RefreshToken } from '../models/refreshTokenModel.js';
 import { AuthenticatedRequest } from '../models/authenticatedRequest.js';
 import { Types } from 'mongoose';
+import logger from '../logger/logger.js';
 
 export const isActiveToken = async (
   req: AuthenticatedRequest,
@@ -39,16 +40,28 @@ export const isActiveToken = async (
         const refreshTokenDoc = await RefreshToken.findOne({
           token: refreshToken,
           userId: decoded.id,
-          revoked: false,
         });
+
         if (!refreshTokenDoc) {
           res.clearCookie('accessToken'); // Clear cookies to log out the user
           res.clearCookie('refreshToken');
-          return next(new HttpError('Refresh token not found or revoked', 401)); // If the refresh token is not found or revoked, return an error
-        }
+          return next(new HttpError('Refresh token not found', 401)); // If the refresh token is not found, return an error
+        } else if (refreshTokenDoc.revoked) {
+          await RefreshToken.updateMany({ userId: decoded.id }, { revoked: true }); // Revoke all refresh tokens for the user
+          // This ensures that if the refresh token is revoked, all associated tokens are also revoked
+          // and the user is logged out from all sessions/devices.
+          // Second step is to send an email notification to the user for updating their password
+          // to prevent unauthorized access.
+          // This is a security measure to ensure that if a refresh token is compromised,
+          // the user is notified and can take action to secure their account.
 
-        // rotate the refresh token
-        if (refreshTokenDoc) {
+          res.clearCookie('accessToken'); // Clear cookies to log out the user
+          res.clearCookie('refreshToken');
+          logger.error(
+            `Refresh token has been revoked: ${refreshTokenDoc._id}, ip address: ${req.ip}`
+          ); // Log the revocation of the refresh token
+          return next(new HttpError('Invalid token', 401)); // If the refresh token has been revoked, return an error
+        } else {
           // If the refresh token is found, revoke it because new tokens will be issued
           refreshTokenDoc.revoked = true;
           refreshTokenDoc.revokedAt = new Date(); // Set the revocation date
@@ -95,9 +108,11 @@ export const isActiveToken = async (
 
         return next(); // If the refresh token is valid, proceed to the next middleware
       } catch (err: any) {
-        return next(new HttpError(`Error: ${err.message}`, 401)); // If the refresh token verification fails, return an error
+        logger.error(`Refresh token verification failed: ${err.message}`); // Log the error if refresh token verification fails
+        return next(new HttpError('Invalid token', 401)); // If the refresh token verification fails, return an error
       }
     }
-    return next(new HttpError('Invalid access token', 401)); // If the token is invalid, return an error
+    logger.error(`Access token verification failed: ${err.message}`); // Log the error if access token verification fails
+    return next(new HttpError('Invalid token', 401)); // If the token is invalid, return an error
   }
 };
