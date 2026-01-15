@@ -63,15 +63,15 @@ export const loginUser: RequestHandler = async (req, res, next) => {
 
     res.cookie('accessToken', accessToken, {
       // Setting the access token as a cookie
-      httpOnly: true, // Secure: true, // Ensuring the cookie is only sent over HTTPS
-      secure: config.nodeEnv === 'production', // Setting secure flag based on the environment
+      httpOnly: true, // Making the cookie HTTP only to prevent client-side scripts from accessing it
+      secure: config.nodeEnv === 'production', // Secure: true, // Ensuring the cookie is only sent over HTTPS // Setting secure flag based on the environment
       maxAge: 15 * 60 * 1000, // Setting the cookie to expire in 15 minutes
     });
 
     res.cookie('refreshToken', refreshToken, {
       // Setting the refresh token as a cookie
-      httpOnly: true, // Secure: true, // Ensuring the cookie is only sent over HTTPS
-      secure: config.nodeEnv === 'production', // Setting secure flag based on the environment
+      httpOnly: true, // Making the cookie HTTP only to prevent client-side scripts from accessing it
+      secure: config.nodeEnv === 'production', // Secure: true, // Ensuring the cookie is only sent over HTTPS // Setting secure flag based on the environment
       maxAge: 7 * 24 * 60 * 60 * 1000, // Setting the cookie to expire in 7 days
     });
 

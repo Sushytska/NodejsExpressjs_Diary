@@ -2,6 +2,7 @@ import { Note } from '../models/noteModel.js';
 import { Response, NextFunction } from 'express';
 import { HttpError } from '../utils/HttpError.js';
 import { AuthenticatedRequest } from '../models/authenticatedRequest.js'; // Importing the AuthenticatedRequest interface
+import logger from '../logger/logger.js';
 
 export const createNote = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   // Middleware to handle note creation
@@ -12,6 +13,7 @@ export const createNote = async (req: AuthenticatedRequest, res: Response, next:
 
     const userId = req.user?.id; // Assuming req.user is populated by a previous middleware
     if (!userId) {
+      logger.error('User ID is required'); // Log the error if login fails
       return next(new HttpError('User ID is required', 400)); // Using the errorHandler middleware to handle the error
     }
 

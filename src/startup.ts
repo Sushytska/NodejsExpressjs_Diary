@@ -17,12 +17,12 @@ export async function startup() {
 
   app.use(cleanUpTokenDB); // Middleware to clean up old tokens from the database
 
-  // app.get('/', (req, res) => {
-  //   res.send('🚀 Server is up and running!');
-  // });
+  app.get('/api', (req, res) => {
+    res.send('🚀 Server is up and running!');
+  });
 
-  app.use('/notes', noteRoutes); // Mounting the noteRoutes on the '/notes' path
-  app.use('/auth', authRouter); // Mounting the authRouter on the '/auth' path
+  app.use('/api/notes', noteRoutes); // Mounting the noteRoutes on the '/notes' path
+  app.use('/api/auth', authRouter); // Mounting the authRouter on the '/auth' path
 
   app.use(errorHandler); // This middleware will catch all requests that do not match any defined routes and respond with a 404 status code
   return app; // Returning the Express application instance for use in other parts of the application
